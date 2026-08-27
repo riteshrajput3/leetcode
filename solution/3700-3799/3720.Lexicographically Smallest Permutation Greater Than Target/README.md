@@ -99,8 +99,76 @@ tags:
 
 #### Python3
 
-```python
+```class Solution:
+    def lexGreaterPermutation(self, s: str, target: str) -> str:
+        n = len(s)
 
+        # Frequency of characters in s
+        cnt = [0] * 26
+        for ch in s:
+            cnt[ord(ch) - ord('a')] += 1
+
+        # Try to match target from left to right
+        for i in range(n):
+            x = ord(target[i]) - ord('a')
+
+            # If target[i] is available, use it
+            if cnt[x] > 0:
+                cnt[x] -= 1
+                continue
+
+            # target[i] cannot be used.
+            # Try the smallest character greater than target[i].
+            for c in range(x + 1, 26):
+                if cnt[c] > 0:
+                    cnt[c] -= 1
+                    return target[:i] + chr(c + ord('a')) + \
+                           ''.join(chr(j + ord('a')) * cnt[j] for j in range(26))
+
+            # Nothing greater here, so backtrack
+            break
+
+        else:
+            # We matched the entire target.
+            # target itself is a permutation of s,
+            # so we need the next greater permutation.
+            i = n
+
+        # Rebuild counts because we need to backtrack cleanly
+        cnt = [0] * 26
+        for ch in s:
+            cnt[ord(ch) - ord('a')] += 1
+
+        # We need to find the rightmost position that can be increased.
+        #
+        # For each position i, target[:i] must be kept unchanged.
+        # The suffix target[i:] is irrelevant after we choose a
+        # larger character at position i.
+
+        for i in range(n - 1, -1, -1):
+
+            # Remove target[0:i] from the available characters.
+            # We do this by rebuilding the suffix counts.
+            cnt = [0] * 26
+
+            for j in range(i, n):
+                cnt[ord(target[j]) - ord('a')] += 1
+
+            x = ord(target[i]) - ord('a')
+
+            # Find the smallest character > target[i]
+            for c in range(x + 1, 26):
+                if cnt[c] > 0:
+                    cnt[c] -= 1
+
+                    suffix = ''.join(
+                        chr(j + ord('a')) * cnt[j]
+                        for j in range(26)
+                    )
+
+                    return target[:i] + chr(c + ord('a')) + suffix
+
+        return ""
 ```
 
 #### Java
